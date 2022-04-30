@@ -143,8 +143,12 @@ impl<'inp, 'out, N: ArrayLength<u8>> InOut<'inp, 'out, GenericArray<u8, N>> {
             let mut temp = GenericArray::<u8, N>::default();
             let temp_slice = core::mem::transmute::<&mut [u8], &mut [u32]>(temp.as_mut_slice());
             for i in 0..N::USIZE / 8 {
-                temp_slice[i] = in_slice[i * 2] ^ data_slice[i * 2];
-                temp_slice[i] = in_slice[i * 2 + 1] ^ data_slice[i * 2 + 1];
+                let a = in_slice[i * 2];
+                let c = data_slice[i * 2];
+                let b = in_slice[i * 2 + 1];
+                let d = data_slice[i * 2 + 1];
+                temp_slice[i] = a ^ c;
+                temp_slice[i] = b ^ d;
             }
             ptr::write(self.out_ptr, temp);
         }

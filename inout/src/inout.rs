@@ -138,10 +138,11 @@ impl<'inp, 'out, N: ArrayLength<u8>> InOut<'inp, 'out, GenericArray<u8, N>> {
     pub fn xor_in2out(&mut self, data: &GenericArray<u8, N>) {
         unsafe {
             let input = ptr::read(self.in_ptr);
-            let mut temp = GenericArray::<u8, N>::default();
-            for i in 0..N::USIZE {
-                temp[i] = input[i] ^ data[i];
-            }
+            let temp = input
+                .into_iter()
+                .zip(data.into_iter())
+                .map(|(a, b)| a & b)
+                .collect::<GenericArray<u8, N>>();
             ptr::write(self.out_ptr, temp);
         }
     }

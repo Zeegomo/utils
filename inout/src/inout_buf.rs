@@ -110,31 +110,31 @@ impl<'inp, 'out, T> InOutBuf<'inp, 'out, T> {
     }
 
     /// Get input slice.
-    #[inline(always)]
+    #[inline(never)]
     pub fn get_in<'a>(&'a self) -> &'a [T] {
         unsafe { slice::from_raw_parts(self.in_ptr, self.len) }
     }
 
     /// Get output slice.
-    #[inline(always)]
+    #[inline(never)]
     pub fn get_out<'a>(&'a mut self) -> &'a mut [T] {
         unsafe { slice::from_raw_parts_mut(self.out_ptr, self.len) }
     }
 
     /// Consume self and return output slice with lifetime `'a`.
-    #[inline(always)]
+    #[inline(never)]
     pub fn into_out(self) -> &'out mut [T] {
         unsafe { slice::from_raw_parts_mut(self.out_ptr, self.len) }
     }
 
     /// Get raw input and output pointers.
-    #[inline(always)]
+    #[inline(never)]
     pub fn into_raw(self) -> (*const T, *mut T) {
         (self.in_ptr, self.out_ptr)
     }
 
     /// Reborrow `self`.
-    #[inline(always)]
+    #[inline(never)]
     pub fn reborrow<'a>(&'a mut self) -> InOutBuf<'a, 'a, T> {
         Self {
             in_ptr: self.in_ptr,
@@ -164,7 +164,7 @@ impl<'inp, 'out, T> InOutBuf<'inp, 'out, T> {
     /// accesses are forbidden. The memory referenced by `in_ptr` must not be
     /// mutated for the duration of lifetime `'a`, except inside an `UnsafeCell`.
     /// - The total size `len * mem::size_of::<T>()`  must be no larger than `isize::MAX`.
-    #[inline(always)]
+    #[inline(never)]
     pub unsafe fn from_raw(
         in_ptr: *const T,
         out_ptr: *mut T,
@@ -187,7 +187,7 @@ impl<'inp, 'out, T> InOutBuf<'inp, 'out, T> {
     /// # Panics
     ///
     /// Panics if `mid > len`.
-    #[inline(always)]
+    #[inline(never)]
     pub fn split_at(self, mid: usize) -> (InOutBuf<'inp, 'out, T>, InOutBuf<'inp, 'out, T>) {
         assert!(mid <= self.len);
         let (tail_in_ptr, tail_out_ptr) = unsafe { (self.in_ptr.add(mid), self.out_ptr.add(mid)) };
@@ -208,7 +208,7 @@ impl<'inp, 'out, T> InOutBuf<'inp, 'out, T> {
     }
 
     /// Partition buffer into 2 parts: buffer of arrays and tail.
-    #[inline(always)]
+    #[inline(never)]
     pub fn into_chunks<N: ArrayLength<T>>(
         self,
     ) -> (
@@ -242,7 +242,7 @@ impl<'inp, 'out> InOutBuf<'inp, 'out, u8> {
     ///
     /// # Panics
     /// If `data` length is not equal to the buffer length.
-    #[inline(always)]
+    #[inline(never)]
     #[allow(clippy::needless_range_loop)]
     pub fn xor_in2out(&mut self, data: &[u8]) {
         assert_eq!(self.len(), data.len());
@@ -262,7 +262,7 @@ where
 {
     type Error = IntoArrayError;
 
-    #[inline(always)]
+    #[inline(never)]
     fn try_into(self) -> Result<InOut<'inp, 'out, GenericArray<T, N>>, Self::Error> {
         if self.len() == N::USIZE {
             Ok(InOut {
@@ -285,7 +285,7 @@ pub struct InOutBufIter<'inp, 'out, T> {
 impl<'inp, 'out, T> Iterator for InOutBufIter<'inp, 'out, T> {
     type Item = InOut<'inp, 'out, T>;
 
-    #[inline(always)]
+    #[inline(never)]
     fn next(&mut self) -> Option<Self::Item> {
         if self.buf.len() == self.pos {
             return None;

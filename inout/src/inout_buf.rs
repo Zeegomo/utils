@@ -110,7 +110,7 @@ impl<'inp, 'out, T> InOutBuf<'inp, 'out, T> {
     }
 
     /// Get input slice.
-    #[inline(never)]
+    #[inline(always)]
     pub fn get_in<'a>(&'a self) -> &'a [T] {
         unsafe { slice::from_raw_parts(self.in_ptr, self.len) }
     }

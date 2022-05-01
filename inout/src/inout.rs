@@ -137,6 +137,7 @@ impl<'inp, 'out, N: ArrayLength<u8>> InOut<'inp, 'out, GenericArray<u8, N>> {
     #[allow(clippy::needless_range_loop)]
     pub fn xor_in2out(&mut self, data: &GenericArray<u8, N>) {
         unsafe {
+            todo!();
             let data_slice = core::mem::transmute::<&[u8], &[u32]>(data.as_slice());
             for i in 0..N::USIZE / 8 {
                 let ptr1 = (self.in_ptr as *const u32).add(i * 2);

@@ -12,7 +12,7 @@ pub struct InOut<'inp, 'out, T> {
 
 impl<'inp, 'out, T> InOut<'inp, 'out, T> {
     /// Reborrow `self`.
-    #[inline(always)]
+    #[inline(never)]
     pub fn reborrow<'a>(&'a mut self) -> InOut<'a, 'a, T> {
         Self {
             in_ptr: self.in_ptr,
@@ -22,19 +22,19 @@ impl<'inp, 'out, T> InOut<'inp, 'out, T> {
     }
 
     /// Get immutable reference to the input value.
-    #[inline(always)]
+    #[inline(never)]
     pub fn get_in<'a>(&'a self) -> &'a T {
         unsafe { &*self.in_ptr }
     }
 
     /// Get mutable reference to the output value.
-    #[inline(always)]
+    #[inline(never)]
     pub fn get_out<'a>(&'a mut self) -> &'a mut T {
         unsafe { &mut *self.out_ptr }
     }
 
     /// Convert `self` to a pair of raw input and output pointers.
-    #[inline(always)]
+    #[inline(never)]
     pub fn into_raw(self) -> (*const T, *mut T) {
         (self.in_ptr, self.out_ptr)
     }
@@ -57,7 +57,7 @@ impl<'inp, 'out, T> InOut<'inp, 'out, T> {
     /// the return value) for the duration of lifetime `'a`. Both read and write
     /// accesses are forbidden. The memory referenced by `in_ptr` must not be
     /// mutated for the duration of lifetime `'a`, except inside an `UnsafeCell`.
-    #[inline(always)]
+    #[inline(never)]
     pub unsafe fn from_raw(in_ptr: *const T, out_ptr: *mut T) -> InOut<'inp, 'out, T> {
         Self {
             in_ptr,
@@ -69,14 +69,14 @@ impl<'inp, 'out, T> InOut<'inp, 'out, T> {
 
 impl<'inp, 'out, T: Clone> InOut<'inp, 'out, T> {
     /// Clone input value and return it.
-    #[inline(always)]
+    #[inline(never)]
     pub fn clone_in(&self) -> T {
         unsafe { (&*self.in_ptr).clone() }
     }
 }
 
 impl<'a, T> From<&'a mut T> for InOut<'a, 'a, T> {
-    #[inline(always)]
+    #[inline(never)]
     fn from(val: &'a mut T) -> Self {
         let p = val as *mut T;
         Self {
@@ -88,7 +88,7 @@ impl<'a, T> From<&'a mut T> for InOut<'a, 'a, T> {
 }
 
 impl<'inp, 'out, T> From<(&'inp T, &'out mut T)> for InOut<'inp, 'out, T> {
-    #[inline(always)]
+    #[inline(never)]
     fn from((in_val, out_val): (&'inp T, &'out mut T)) -> Self {
         Self {
             in_ptr: in_val as *const T,
@@ -103,7 +103,7 @@ impl<'inp, 'out, T, N: ArrayLength<T>> InOut<'inp, 'out, GenericArray<T, N>> {
     ///
     /// # Panics
     /// If `pos` greater or equal to array length.
-    #[inline(always)]
+    #[inline(never)]
     pub fn get<'a>(&'a mut self, pos: usize) -> InOut<'a, 'a, T> {
         assert!(pos < N::USIZE);
         unsafe {
@@ -116,7 +116,7 @@ impl<'inp, 'out, T, N: ArrayLength<T>> InOut<'inp, 'out, GenericArray<T, N>> {
     }
 
     /// Convert `InOut` array to `InOutBuf`.
-    #[inline(always)]
+    #[inline(never)]
     pub fn into_buf(self) -> InOutBuf<'inp, 'out, T> {
         InOutBuf {
             in_ptr: self.in_ptr as *const T,
@@ -137,7 +137,7 @@ impl<'inp, 'out, N: ArrayLength<u8>> InOut<'inp, 'out, GenericArray<u8, N>> {
     #[allow(clippy::needless_range_loop)]
     pub fn xor_in2out(&mut self, data: &GenericArray<u8, N>) {
         unsafe {
-            todo!();
+            //todo!();
             let data_slice = core::mem::transmute::<&[u8], &[u32]>(data.as_slice());
             for i in 0..N::USIZE / 8 {
                 let ptr1 = (self.in_ptr as *const u32).add(i * 2);
@@ -163,7 +163,7 @@ where
     ///
     /// # Panics
     /// If `data` length is not equal to the buffer length.
-    #[inline(always)]
+    #[inline(never)]
     #[allow(clippy::needless_range_loop)]
     pub fn xor_in2out(&mut self, data: &GenericArray<GenericArray<u8, N>, M>) {
         unsafe {

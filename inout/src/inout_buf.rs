@@ -116,25 +116,25 @@ impl<'inp, 'out, T> InOutBuf<'inp, 'out, T> {
     }
 
     /// Get output slice.
-    #[inline(always)]
+    #[inline(never)]
     pub fn get_out<'a>(&'a mut self) -> &'a mut [T] {
         unsafe { slice::from_raw_parts_mut(self.out_ptr, self.len) }
     }
 
     /// Consume self and return output slice with lifetime `'a`.
-    #[inline(always)]
+    #[inline(never)]
     pub fn into_out(self) -> &'out mut [T] {
         unsafe { slice::from_raw_parts_mut(self.out_ptr, self.len) }
     }
 
     /// Get raw input and output pointers.
-    #[inline(always)]
+    #[inline(never)]
     pub fn into_raw(self) -> (*const T, *mut T) {
         (self.in_ptr, self.out_ptr)
     }
 
     /// Reborrow `self`.
-    #[inline(always)]
+    #[inline(never)]
     pub fn reborrow<'a>(&'a mut self) -> InOutBuf<'a, 'a, T> {
         Self {
             in_ptr: self.in_ptr,
@@ -164,7 +164,7 @@ impl<'inp, 'out, T> InOutBuf<'inp, 'out, T> {
     /// accesses are forbidden. The memory referenced by `in_ptr` must not be
     /// mutated for the duration of lifetime `'a`, except inside an `UnsafeCell`.
     /// - The total size `len * mem::size_of::<T>()`  must be no larger than `isize::MAX`.
-    #[inline(always)]
+    #[inline(never)]
     pub unsafe fn from_raw(
         in_ptr: *const T,
         out_ptr: *mut T,

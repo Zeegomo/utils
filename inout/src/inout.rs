@@ -69,14 +69,14 @@ impl<'inp, 'out, T> InOut<'inp, 'out, T> {
 
 impl<'inp, 'out, T: Clone> InOut<'inp, 'out, T> {
     /// Clone input value and return it.
-    #[inline(never)]
+    #[inline(always)]
     pub fn clone_in(&self) -> T {
         unsafe { (&*self.in_ptr).clone() }
     }
 }
 
 impl<'a, T> From<&'a mut T> for InOut<'a, 'a, T> {
-    #[inline(never)]
+    #[inline(always)]
     fn from(val: &'a mut T) -> Self {
         let p = val as *mut T;
         Self {
@@ -88,7 +88,7 @@ impl<'a, T> From<&'a mut T> for InOut<'a, 'a, T> {
 }
 
 impl<'inp, 'out, T> From<(&'inp T, &'out mut T)> for InOut<'inp, 'out, T> {
-    #[inline(never)]
+    #[inline(always)]
     fn from((in_val, out_val): (&'inp T, &'out mut T)) -> Self {
         Self {
             in_ptr: in_val as *const T,
@@ -103,7 +103,7 @@ impl<'inp, 'out, T, N: ArrayLength<T>> InOut<'inp, 'out, GenericArray<T, N>> {
     ///
     /// # Panics
     /// If `pos` greater or equal to array length.
-    #[inline(never)]
+    #[inline(always)]
     pub fn get<'a>(&'a mut self, pos: usize) -> InOut<'a, 'a, T> {
         assert!(pos < N::USIZE);
         unsafe {
@@ -116,7 +116,7 @@ impl<'inp, 'out, T, N: ArrayLength<T>> InOut<'inp, 'out, GenericArray<T, N>> {
     }
 
     /// Convert `InOut` array to `InOutBuf`.
-    #[inline(never)]
+    #[inline(always)]
     pub fn into_buf(self) -> InOutBuf<'inp, 'out, T> {
         InOutBuf {
             in_ptr: self.in_ptr as *const T,

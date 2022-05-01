@@ -138,10 +138,13 @@ impl<'inp, 'out, N: ArrayLength<u8>> InOut<'inp, 'out, GenericArray<u8, N>> {
     pub fn xor_in2out(&mut self, data: &GenericArray<u8, N>) {
         unsafe {
             let data_slice = core::mem::transmute::<&[u8], &[u32]>(data.as_slice());
-            for i in 0..N::USIZE / 4 {
-                let a = core::ptr::read((self.in_ptr as *const u32).add(i));
-                let b = data_slice[i];
-                ptr::write((self.out_ptr as *mut u32).add(i), a ^ b);
+            for i in 0..N::USIZE / 8 {
+                let a = core::ptr::read((self.in_ptr as *const u32).add(i * 2));
+                let aa = core::ptr::read((self.in_ptr as *const u32).add(i * 2 + 1));
+                let b = data_slice[i * 2];
+                let bb = data_slice[i * 2 + 1];
+                ptr::write((self.out_ptr as *mut u32).add(i * 2), a ^ b);
+                ptr::write((self.out_ptr as *mut u32).add(i * 2 + 1), aa ^ bb);
             }
         }
     }

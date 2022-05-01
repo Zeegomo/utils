@@ -128,13 +128,13 @@ impl<'inp, 'out, T> InOutBuf<'inp, 'out, T> {
     }
 
     /// Get raw input and output pointers.
-    #[inline(never)]
+    #[inline(always)]
     pub fn into_raw(self) -> (*const T, *mut T) {
         (self.in_ptr, self.out_ptr)
     }
 
     /// Reborrow `self`.
-    #[inline(never)]
+    #[inline(always)]
     pub fn reborrow<'a>(&'a mut self) -> InOutBuf<'a, 'a, T> {
         Self {
             in_ptr: self.in_ptr,
@@ -164,7 +164,7 @@ impl<'inp, 'out, T> InOutBuf<'inp, 'out, T> {
     /// accesses are forbidden. The memory referenced by `in_ptr` must not be
     /// mutated for the duration of lifetime `'a`, except inside an `UnsafeCell`.
     /// - The total size `len * mem::size_of::<T>()`  must be no larger than `isize::MAX`.
-    #[inline(never)]
+    #[inline(always)]
     pub unsafe fn from_raw(
         in_ptr: *const T,
         out_ptr: *mut T,

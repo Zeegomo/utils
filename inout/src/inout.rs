@@ -12,7 +12,7 @@ pub struct InOut<'inp, 'out, T> {
 
 impl<'inp, 'out, T> InOut<'inp, 'out, T> {
     /// Reborrow `self`.
-    #[inline(never)]
+    #[inline(always)]
     pub fn reborrow<'a>(&'a mut self) -> InOut<'a, 'a, T> {
         Self {
             in_ptr: self.in_ptr,
@@ -22,19 +22,19 @@ impl<'inp, 'out, T> InOut<'inp, 'out, T> {
     }
 
     /// Get immutable reference to the input value.
-    #[inline(never)]
+    #[inline(always)]
     pub fn get_in<'a>(&'a self) -> &'a T {
         unsafe { &*self.in_ptr }
     }
 
     /// Get mutable reference to the output value.
-    #[inline(never)]
+    #[inline(always)]
     pub fn get_out<'a>(&'a mut self) -> &'a mut T {
         unsafe { &mut *self.out_ptr }
     }
 
     /// Convert `self` to a pair of raw input and output pointers.
-    #[inline(never)]
+    #[inline(always)]
     pub fn into_raw(self) -> (*const T, *mut T) {
         (self.in_ptr, self.out_ptr)
     }
@@ -57,7 +57,7 @@ impl<'inp, 'out, T> InOut<'inp, 'out, T> {
     /// the return value) for the duration of lifetime `'a`. Both read and write
     /// accesses are forbidden. The memory referenced by `in_ptr` must not be
     /// mutated for the duration of lifetime `'a`, except inside an `UnsafeCell`.
-    #[inline(never)]
+    #[inline(always)]
     pub unsafe fn from_raw(in_ptr: *const T, out_ptr: *mut T) -> InOut<'inp, 'out, T> {
         Self {
             in_ptr,

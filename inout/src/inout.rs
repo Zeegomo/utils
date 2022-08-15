@@ -178,7 +178,7 @@ where
     ///
     /// # Panics
     /// If `data` length is not equal to the buffer length.
-    #[inline(never)]
+    #[inline(always)]
     #[allow(clippy::needless_range_loop)]
     pub fn xor_in2out(&mut self, data: &GenericArray<GenericArray<u8, N>, M>) {
         unsafe {

@@ -244,14 +244,14 @@ impl<'inp, 'out> InOutBuf<'inp, 'out, u8> {
     /// If `data` length is not equal to the buffer length.
     #[inline(never)]
     #[allow(clippy::needless_range_loop)]
-    pub fn xor_in2out(&mut self, data: &[u8]) {
-        panic!();
-        assert_eq!(self.len(), data.len());
+    pub fn xor_in2out(&mut self, _data: &[u8]) {
+        unimplemented!();
+        assert_eq!(self.len(), _data.len());
         unsafe {
-            for i in 0..data.len() {
+            for i in 0.._data.len() {
                 let in_ptr = self.in_ptr.add(i);
                 let out_ptr = self.out_ptr.add(i);
-                *out_ptr = *in_ptr ^ data[i];
+                *out_ptr = *in_ptr ^ _data[i];
             }
         }
     }

@@ -137,27 +137,33 @@ impl<'inp, 'out, N: ArrayLength<u8>> InOut<'inp, 'out, GenericArray<u8, N>> {
     #[allow(clippy::needless_range_loop)]
     pub fn xor_in2out(&mut self, data: &GenericArray<u8, N>) {
         unsafe {
-            let data_slice = core::mem::transmute::<&[u8], &[u32]>(data.as_slice());
-            for i in 0..N::USIZE / 8 {
-                let ptr1 = (self.in_ptr as *const u32).add(i * 2);
-                let ptr2 = ptr1.add(1);
-                let a = core::ptr::read(ptr1);
+            let mut data_ptr = core::mem::transmute::<&[u8], &[u32]>(data.as_slice()).as_ptr();
+            let mut in_ptr = self.in_ptr as *const u32;
+            let mut out_ptr = self.out_ptr as *mut u32;
+            for _ in 0..N::USIZE >> 3 {
+                let ptr2 = in_ptr.add(1);
+                let data_ptr_2 = data_ptr.add(1);
+                let out_ptr_2 = out_ptr.add(1);
+                let a = core::ptr::read(in_ptr);
                 let aa = core::ptr::read(ptr2);
-                let b = data_slice[i * 2];
-                let bb = data_slice[i * 2 + 1];
-                ptr::write((self.out_ptr as *mut u32).add(i * 2), a ^ b);
-                ptr::write((self.out_ptr as *mut u32).add(i * 2 + 1), aa ^ bb);
+                let b = core::ptr::read(data_ptr);
+                let bb = core::ptr::read(data_ptr_2);
+                ptr::write(out_ptr, a ^ b);
+                ptr::write(out_ptr_2, aa ^ bb);
+                in_ptr = in_ptr.add(2);
+                out_ptr = out_ptr.add(2);
+                data_ptr = data_ptr.add(2);
             }
-            // let perf = N::USIZE / 8 * 8;
-            // let rem = N::USIZE - perf;
-            // for i in 0..rem {
-            //     let idx = perf + i;
-            //     let ptr1 = (self.in_ptr as *const u8).add(idx);
-            //     ptr::write(
-            //         (self.out_ptr as *mut u8).add(idx),
-            //         data[idx] ^ ptr::read(ptr1),
-            //     )
-            // }
+            let perf = N::USIZE / 8 * 8;
+            let rem = N::USIZE - perf;
+            for i in 0..rem {
+                let idx = perf + i;
+                let ptr1 = (self.in_ptr as *const u8).add(idx);
+                ptr::write(
+                    (self.out_ptr as *mut u8).add(idx),
+                    data[idx] ^ ptr::read(ptr1),
+                )
+            }
         }
     }
 }

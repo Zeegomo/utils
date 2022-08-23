@@ -154,15 +154,14 @@ impl<'inp, 'out, N: ArrayLength<u8>> InOut<'inp, 'out, GenericArray<u8, N>> {
                 out_ptr = out_ptr.add(2);
                 data_ptr = data_ptr.add(2);
             }
-            let perf = N::USIZE / 8 * 8;
-            let rem = N::USIZE - perf;
-            for i in 0..rem {
-                let idx = perf + i;
-                let ptr1 = (self.in_ptr as *const u8).add(idx);
-                ptr::write(
-                    (self.out_ptr as *mut u8).add(idx),
-                    data[idx] ^ ptr::read(ptr1),
-                )
+            let rem = N::USIZE & 7;
+            for _ in 0..rem {
+                let a = core::ptr::read(in_ptr);
+                let b = core::ptr::read(data_ptr);
+                ptr::write(out_ptr, a ^ b);
+                in_ptr = in_ptr.add(1);
+                data_ptr = data_ptr.add(1);
+                out_ptr = out_ptr.add(1);
             }
         }
     }

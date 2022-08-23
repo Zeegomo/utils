@@ -245,7 +245,6 @@ impl<'inp, 'out> InOutBuf<'inp, 'out, u8> {
     #[inline(always)]
     #[allow(clippy::needless_range_loop)]
     pub fn xor_in2out(&mut self, _data: &[u8]) {
-        unimplemented!();
         assert_eq!(self.len(), _data.len());
         unsafe {
             for i in 0.._data.len() {

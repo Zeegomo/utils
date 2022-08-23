@@ -137,36 +137,29 @@ impl<'inp, 'out, N: ArrayLength<u8>> InOut<'inp, 'out, GenericArray<u8, N>> {
     #[allow(clippy::needless_range_loop)]
     pub fn xor_in2out(&mut self, data: &GenericArray<u8, N>) {
         unsafe {
-            let mut data_ptr = data.as_ptr() as *const u32;
-            let mut in_ptr = self.in_ptr as *const u32;
-            let mut out_ptr = self.out_ptr as *mut u32;
-            for _ in 0..N::USIZE >> 3 {
-                let ptr2 = in_ptr.add(1);
-                let data_ptr_2 = data_ptr.add(1);
-                let out_ptr_2 = out_ptr.add(1);
-                let a = core::ptr::read(in_ptr);
-                let aa = core::ptr::read(ptr2);
-                let b = core::ptr::read(data_ptr);
-                let bb = core::ptr::read(data_ptr_2);
-                let r1 = a ^ b;
-                let r2 = aa ^ bb;
-                ptr::write(out_ptr, r1);
-                ptr::write(out_ptr_2, r2);
-                in_ptr = in_ptr.add(2);
-                out_ptr = out_ptr.add(2);
-                data_ptr = data_ptr.add(2);
-            }
-            let rem = N::USIZE & 7;
-            let mut in_ptr = in_ptr as *const u8;
-            let mut out_ptr = out_ptr as *mut u8;
-            let mut data_ptr = data_ptr as *const u8;
-            for _ in 0..rem {
-                let a = core::ptr::read(in_ptr);
-                let b = core::ptr::read(data_ptr);
-                ptr::write(out_ptr, a ^ b);
-                in_ptr = in_ptr.add(1);
-                data_ptr = data_ptr.add(1);
-                out_ptr = out_ptr.add(1);
+            assert_eq!(N::USIZE & 7, 0);
+            unsafe {
+                // t0 / t1 data unroll
+                // t2 / t3 input unroll
+                core::arch::asm!(
+                    asm_macros::lp_setup!(0, t4, 16),
+                    asm_macros::lw_pi!(t0, 4(a0!)),
+                    asm_macros::lw_pi!(t1, 4(a0!)),
+                    asm_macros::lw_pi!(t2, 4(a1!)),
+                    asm_macros::lw_pi!(t3, 4(a1!)),
+                    asm_macros::xor!(t0, t0, t2),
+                    asm_macros::xor!(t1, t1, t3),
+                    asm_macros::sw_pi!(t0, 4(a2!)),
+                    asm_macros::sw_pi!(t1, 4(a2!)),
+                    in("a0") self.in_ptr as *const u32,
+                    in("a1") data.as_ptr() as *const u32,
+                    in("a2") self.out_ptr as *const u32,
+                    out("t0") _,
+                    out("t1") _,
+                    out("t2") _,
+                    out("t3") _,
+                    in("t4") N::USIZE / 8,
+                )
             }
         }
     }

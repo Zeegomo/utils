@@ -13,6 +13,7 @@ keywords = ["custom-reference"]
 [dependencies]
 generic-array = "0.14"
 block-padding = { version = "0.3", path = "../block-padding", optional = true }
+asm-macros = { git = "https://github.com/Zeegomo/stream-ciphers" }
 
 [features]
 std = ["block-padding/std"]

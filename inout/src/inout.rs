@@ -137,37 +137,37 @@ impl<'inp, 'out, N: ArrayLength<u8>> InOut<'inp, 'out, GenericArray<u8, N>> {
     #[allow(clippy::needless_range_loop)]
     pub fn xor_in2out(&mut self, data: &GenericArray<u8, N>) {
         unsafe {
-            let mut data_ptr = core::mem::transmute::<&[u8], &[u32]>(data.as_slice()).as_ptr();
-            let mut in_ptr = self.in_ptr as *const u32;
-            let mut out_ptr = self.out_ptr as *mut u32;
-            for _ in 0..N::USIZE >> 3 {
-                let ptr2 = in_ptr.add(1);
-                let data_ptr_2 = data_ptr.add(1);
-                let out_ptr_2 = out_ptr.add(1);
-                let a = core::ptr::read(in_ptr);
-                let aa = core::ptr::read(ptr2);
-                let b = core::ptr::read(data_ptr);
-                let bb = core::ptr::read(data_ptr_2);
-                ptr::write(out_ptr, a ^ b);
-                ptr::write(out_ptr_2, aa ^ bb);
-                in_ptr = in_ptr.add(2);
-                out_ptr = out_ptr.add(2);
-                data_ptr = data_ptr.add(2);
-            }
-            let rem = N::USIZE & 7;
-            for _ in 0..rem >> 2 {
-                let a = core::ptr::read(in_ptr);
-                let b = core::ptr::read(data_ptr);
-                ptr::write(out_ptr, a ^ b);
-                in_ptr = in_ptr.add(1);
-                data_ptr = data_ptr.add(1);
-                out_ptr = out_ptr.add(1);
-            }
-            let rem = rem & 3;
-            let mut in_ptr = in_ptr as *const u8;
-            let mut out_ptr = out_ptr as *mut u8;
-            let mut data_ptr = data_ptr as *const u8;
-            for _ in 0..rem {
+            // let mut data_ptr = core::mem::transmute::<&[u8], &[u32]>(data.as_slice()).as_ptr();
+            // let mut in_ptr = self.in_ptr as *const u32;
+            // let mut out_ptr = self.out_ptr as *mut u32;
+            // for _ in 0..N::USIZE >> 3 {
+            //     let ptr2 = in_ptr.add(1);
+            //     let data_ptr_2 = data_ptr.add(1);
+            //     let out_ptr_2 = out_ptr.add(1);
+            //     let a = core::ptr::read(in_ptr);
+            //     let aa = core::ptr::read(ptr2);
+            //     let b = core::ptr::read(data_ptr);
+            //     let bb = core::ptr::read(data_ptr_2);
+            //     ptr::write(out_ptr, a ^ b);
+            //     ptr::write(out_ptr_2, aa ^ bb);
+            //     in_ptr = in_ptr.add(2);
+            //     out_ptr = out_ptr.add(2);
+            //     data_ptr = data_ptr.add(2);
+            // }
+            // let rem = N::USIZE & 7;
+            // for _ in 0..rem >> 2 {
+            //     let a = core::ptr::read(in_ptr);
+            //     let b = core::ptr::read(data_ptr);
+            //     ptr::write(out_ptr, a ^ b);
+            //     in_ptr = in_ptr.add(1);
+            //     data_ptr = data_ptr.add(1);
+            //     out_ptr = out_ptr.add(1);
+            // }
+            // let rem = rem & 3;
+            let mut in_ptr = self.in_ptr as *const u8;
+            let mut out_ptr = self.out_ptr as *mut u8;
+            let mut data_ptr = data.as_ptr() as *const u8;
+            for _ in 0..N::USIZE {
                 let a = core::ptr::read(in_ptr);
                 let b = core::ptr::read(data_ptr);
                 ptr::write(out_ptr, a ^ b);
@@ -203,4 +203,15 @@ where
             ptr::write(self.out_ptr, temp);
         }
     }
+}
+
+#[test]
+fn testlol() {
+    let slice = [1u8; 513];
+    let xor: &GenericArray<u8, generic_array::typenum::U513> = GenericArray::from_slice(&slice);
+    let mut buf = [0u8; 513];
+    let ar = GenericArray::from_mut_slice(&mut buf);
+    let mut inout = InOut::from(ar);
+    inout.xor_in2out(xor);
+    assert!(inout.get_out()[0] == 1);
 }

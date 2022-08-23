@@ -164,17 +164,24 @@ impl<'inp, 'out, N: ArrayLength<u8>> InOut<'inp, 'out, GenericArray<u8, N>> {
             //     out_ptr = out_ptr.add(1);
             // }
             // let rem = rem & 3;
-            let mut in_ptr = self.in_ptr as *const u8;
-            let mut out_ptr = self.out_ptr as *mut u8;
-            let mut data_ptr = data.as_ptr() as *const u8;
-            for _ in 0..N::USIZE {
-                let a = core::ptr::read(in_ptr);
-                let b = core::ptr::read(data_ptr);
-                ptr::write(out_ptr, a ^ b);
-                in_ptr = in_ptr.add(1);
-                data_ptr = data_ptr.add(1);
-                out_ptr = out_ptr.add(1);
+            // let mut in_ptr = self.in_ptr as *const u8;
+            // let mut out_ptr = self.out_ptr as *mut u8;
+            // let mut data_ptr = data.as_ptr() as *const u8;
+            // for _ in 0..N::USIZE {
+            //     let a = core::ptr::read(in_ptr);
+            //     let b = core::ptr::read(data_ptr);
+            //     ptr::write(out_ptr, a ^ b);
+            //     in_ptr = in_ptr.add(1);
+            //     data_ptr = data_ptr.add(1);
+            //     out_ptr = out_ptr.add(1);
+            // }
+
+            let input = ptr::read(self.in_ptr);
+            let mut temp = GenericArray::<u8, N>::default();
+            for i in 0..N::USIZE {
+                temp[i] = input[i] ^ data[i];
             }
+            ptr::write(self.out_ptr, temp);
         }
     }
 }
